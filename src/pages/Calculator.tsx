@@ -72,27 +72,40 @@ const Calculator = () => {
   };
 
   const saveCalculation = () => {
-    if (!results || !user) return;
+    if (!results || !user) {
+      toast.error("Erro ao salvar: dados incompletos");
+      return;
+    }
 
-    calculations.save({
-      userId: user.id,
-      supplierName,
-      palletCount: parseFloat(palletCount),
-      startTime: results.startTime,
-      unloadingTime: results.unloadingEnd,
-      labelingTime: results.labelingEnd,
-      inspectionTime: results.inspectionEnd,
-      storageTime: results.storageEnd,
-      totalTime: results.storageEnd,
-    });
+    try {
+      calculations.save({
+        userId: user.id,
+        supplierName,
+        palletCount: parseFloat(palletCount),
+        startTime: results.startTime,
+        unloadingTime: results.unloadingEnd,
+        labelingTime: results.labelingEnd,
+        inspectionTime: results.inspectionEnd,
+        storageTime: results.storageEnd,
+        totalTime: results.storageEnd,
+      });
 
-    toast.success("Cálculo salvo com sucesso!");
-    
-    // Reset form
-    setSupplierName("");
-    setPalletCount("");
-    setStartTime("");
-    setResults(null);
+      toast.success("Cálculo salvo com sucesso! Redirecionando para o histórico...");
+      
+      // Reset form
+      setSupplierName("");
+      setPalletCount("");
+      setStartTime("");
+      setResults(null);
+      
+      // Navigate to history after a short delay
+      setTimeout(() => {
+        navigate("/history");
+      }, 1500);
+    } catch (error) {
+      console.error("Erro ao salvar cálculo:", error);
+      toast.error("Erro ao salvar cálculo. Tente novamente.");
+    }
   };
 
   const handleLogout = () => {
