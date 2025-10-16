@@ -16,11 +16,11 @@ const Calculator = () => {
   const [palletCount, setPalletCount] = useState("");
   const [startTime, setStartTime] = useState("");
   const [results, setResults] = useState<{
-    unloading: number;
-    labeling: number;
-    inspection: number;
-    storage: number;
-    total: number;
+    startTime: string;
+    unloadingEnd: string;
+    labelingEnd: string;
+    inspectionEnd: string;
+    storageEnd: string;
   } | null>(null);
 
   useEffect(() => {
@@ -28,6 +28,14 @@ const Calculator = () => {
       navigate("/auth");
     }
   }, [user, navigate]);
+
+  const addMinutesToTime = (timeString: string, minutes: number): string => {
+    const [hours, mins] = timeString.split(':').map(Number);
+    const totalMinutes = hours * 60 + mins + minutes;
+    const newHours = Math.floor(totalMinutes / 60) % 24;
+    const newMins = Math.round(totalMinutes % 60);
+    return `${String(newHours).padStart(2, '0')}:${String(newMins).padStart(2, '0')}`;
+  };
 
   const calculateTimes = () => {
     const pallets = parseFloat(palletCount);
@@ -39,19 +47,27 @@ const Calculator = () => {
       toast.error("Por favor, insira o nome do fornecedor");
       return;
     }
+    if (!startTime) {
+      toast.error("Por favor, insira a hora inicial");
+      return;
+    }
 
-    const unloading = (pallets * 71) / 60;
-    const labeling = (pallets * 106) / 60;
-    const inspection = (pallets * 55) / 60;
-    const storage = (pallets * 170) / 60;
-    const total = unloading + labeling + inspection + storage;
+    const unloadingDuration = (pallets * 71) / 60;
+    const labelingDuration = (pallets * 106) / 60;
+    const inspectionDuration = (pallets * 55) / 60;
+    const storageDuration = (pallets * 170) / 60;
+
+    const unloadingEnd = addMinutesToTime(startTime, unloadingDuration);
+    const labelingEnd = addMinutesToTime(unloadingEnd, labelingDuration);
+    const inspectionEnd = addMinutesToTime(labelingEnd, inspectionDuration);
+    const storageEnd = addMinutesToTime(inspectionEnd, storageDuration);
 
     setResults({
-      unloading,
-      labeling,
-      inspection,
-      storage,
-      total,
+      startTime,
+      unloadingEnd,
+      labelingEnd,
+      inspectionEnd,
+      storageEnd,
     });
   };
 
@@ -62,12 +78,12 @@ const Calculator = () => {
       userId: user.id,
       supplierName,
       palletCount: parseFloat(palletCount),
-      startTime,
-      unloadingTime: results.unloading,
-      labelingTime: results.labeling,
-      inspectionTime: results.inspection,
-      storageTime: results.storage,
-      totalTime: results.total,
+      startTime: results.startTime,
+      unloadingTime: results.unloadingEnd,
+      labelingTime: results.labelingEnd,
+      inspectionTime: results.inspectionEnd,
+      storageTime: results.storageEnd,
+      totalTime: results.storageEnd,
     });
 
     toast.success("Cálculo salvo com sucesso!");
@@ -85,11 +101,6 @@ const Calculator = () => {
     navigate("/auth");
   };
 
-  const formatTime = (minutes: number) => {
-    const hours = Math.floor(minutes / 60);
-    const mins = Math.round(minutes % 60);
-    return `${hours}h ${mins}min`;
-  };
 
   if (!user) return null;
 
@@ -162,68 +173,68 @@ const Calculator = () => {
               <>
                 <Separator />
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Resultados</h3>
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <Card className="border-primary/20">
-                      <CardContent className="pt-6">
+                  <h3 className="text-lg font-semibold">Resultados - Tempos de Conclusão</h3>
+                  <div className="grid gap-3">
+                    <Card className="border-accent/30 bg-accent/10">
+                      <CardContent className="pt-4">
                         <div className="flex items-center gap-3">
-                          <Package className="h-8 w-8 text-primary" />
+                          <Clock className="h-6 w-6 text-accent-foreground" />
                           <div>
-                            <p className="text-sm text-muted-foreground">Descarregamento</p>
-                            <p className="text-2xl font-bold">{formatTime(results.unloading)}</p>
+                            <p className="text-sm text-muted-foreground">🕓 Tempo Inicial</p>
+                            <p className="text-xl font-bold">{results.startTime}</p>
                           </div>
                         </div>
                       </CardContent>
                     </Card>
 
                     <Card className="border-primary/20">
-                      <CardContent className="pt-6">
+                      <CardContent className="pt-4">
                         <div className="flex items-center gap-3">
-                          <Tag className="h-8 w-8 text-primary" />
+                          <Package className="h-6 w-6 text-primary" />
                           <div>
-                            <p className="text-sm text-muted-foreground">Etiquetagem</p>
-                            <p className="text-2xl font-bold">{formatTime(results.labeling)}</p>
+                            <p className="text-sm text-muted-foreground">🚚 Tempo Final de Descarregamento</p>
+                            <p className="text-xl font-bold">{results.unloadingEnd}</p>
                           </div>
                         </div>
                       </CardContent>
                     </Card>
 
                     <Card className="border-primary/20">
-                      <CardContent className="pt-6">
+                      <CardContent className="pt-4">
                         <div className="flex items-center gap-3">
-                          <ClipboardCheck className="h-8 w-8 text-primary" />
+                          <Tag className="h-6 w-6 text-primary" />
                           <div>
-                            <p className="text-sm text-muted-foreground">Conferência</p>
-                            <p className="text-2xl font-bold">{formatTime(results.inspection)}</p>
+                            <p className="text-sm text-muted-foreground">🏷️ Tempo Final de Etiquetagem</p>
+                            <p className="text-xl font-bold">{results.labelingEnd}</p>
                           </div>
                         </div>
                       </CardContent>
                     </Card>
 
                     <Card className="border-primary/20">
-                      <CardContent className="pt-6">
+                      <CardContent className="pt-4">
                         <div className="flex items-center gap-3">
-                          <Archive className="h-8 w-8 text-primary" />
+                          <ClipboardCheck className="h-6 w-6 text-primary" />
                           <div>
-                            <p className="text-sm text-muted-foreground">Guarda</p>
-                            <p className="text-2xl font-bold">{formatTime(results.storage)}</p>
+                            <p className="text-sm text-muted-foreground">📋 Tempo Final de Conferência</p>
+                            <p className="text-xl font-bold">{results.inspectionEnd}</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-primary/20">
+                      <CardContent className="pt-4">
+                        <div className="flex items-center gap-3">
+                          <Archive className="h-6 w-6 text-primary" />
+                          <div>
+                            <p className="text-sm text-muted-foreground">🏠 Tempo Final de Guarda</p>
+                            <p className="text-xl font-bold">{results.storageEnd}</p>
                           </div>
                         </div>
                       </CardContent>
                     </Card>
                   </div>
-
-                  <Card className="bg-accent text-accent-foreground border-accent">
-                    <CardContent className="pt-6">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-medium">Tempo Total</p>
-                          <p className="text-3xl font-bold">{formatTime(results.total)}</p>
-                        </div>
-                        <Clock className="h-12 w-12 opacity-50" />
-                      </div>
-                    </CardContent>
-                  </Card>
 
                   <Button onClick={saveCalculation} className="w-full" variant="default">
                     Salvar Cálculo

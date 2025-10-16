@@ -46,11 +46,6 @@ const History = () => {
     setFilteredCalculations(filtered);
   }, [supplierFilter, dateFilter, allCalculations]);
 
-  const formatTime = (minutes: number) => {
-    const hours = Math.floor(minutes / 60);
-    const mins = Math.round(minutes % 60);
-    return `${hours}h ${mins}min`;
-  };
 
   if (!user) return null;
 
@@ -126,11 +121,10 @@ const History = () => {
                       <TableHead>Fornecedor</TableHead>
                       <TableHead className="text-right">Paletes</TableHead>
                       <TableHead>Hora Inicial</TableHead>
-                      <TableHead className="text-right">Descarreg.</TableHead>
-                      <TableHead className="text-right">Etiquetagem</TableHead>
-                      <TableHead className="text-right">Conferência</TableHead>
-                      <TableHead className="text-right">Guarda</TableHead>
-                      <TableHead className="text-right font-semibold">Total</TableHead>
+                      <TableHead className="text-right">Fim Descarreg.</TableHead>
+                      <TableHead className="text-right">Fim Etiquetagem</TableHead>
+                      <TableHead className="text-right">Fim Conferência</TableHead>
+                      <TableHead className="text-right">Fim Guarda</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -143,19 +137,16 @@ const History = () => {
                         <TableCell className="text-right">{calc.palletCount}</TableCell>
                         <TableCell>{calc.startTime || "-"}</TableCell>
                         <TableCell className="text-right text-muted-foreground">
-                          {formatTime(calc.unloadingTime)}
+                          {calc.unloadingTime}
                         </TableCell>
                         <TableCell className="text-right text-muted-foreground">
-                          {formatTime(calc.labelingTime)}
+                          {calc.labelingTime}
                         </TableCell>
                         <TableCell className="text-right text-muted-foreground">
-                          {formatTime(calc.inspectionTime)}
-                        </TableCell>
-                        <TableCell className="text-right text-muted-foreground">
-                          {formatTime(calc.storageTime)}
+                          {calc.inspectionTime}
                         </TableCell>
                         <TableCell className="text-right font-semibold text-primary">
-                          {formatTime(calc.totalTime)}
+                          {calc.storageTime}
                         </TableCell>
                       </TableRow>
                     ))}

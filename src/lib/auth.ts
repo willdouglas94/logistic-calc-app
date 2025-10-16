@@ -10,11 +10,11 @@ export interface Calculation {
   supplierName: string;
   palletCount: number;
   startTime: string;
-  unloadingTime: number;
-  labelingTime: number;
-  inspectionTime: number;
-  storageTime: number;
-  totalTime: number;
+  unloadingTime: string;
+  labelingTime: string;
+  inspectionTime: string;
+  storageTime: string;
+  totalTime: string;
   createdAt: string;
 }
 
